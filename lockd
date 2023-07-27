@@ -1,0 +1,91 @@
+trap '' 2 3 19 20
+failpwordcount=3
+failunamecount=3
+failhnamecount=3
+loggedin=0
+
+printf "\n"
+echo "Authentication Required!"
+printf "\n"
+
+while true :
+do
+	if [ $loggedin -eq 0 ]; then
+		if [ $failhnamecount -gt 0 ]; then
+			echo -n "Hostname :- "
+			read -r HNAME
+
+			if [ "$HNAME" == "localhost" ]; then
+				while true :
+				do
+					if [ $loggedin -eq 0 ]; then
+						if [ $failunamecount -gt 0 ]; then
+							echo -n "Username :- "
+							read -r UNAME
+
+							if [ "$UNAME" == "tester" ]; then
+								localhost_tester_PWORD="testpass"
+								echo -n "Password :- "
+								read -rs PWORD
+
+								if [ "$PWORD" == $localhost_tester_PWORD ]; then
+									echo "Password Working!"
+									((loggedin++))
+								else 
+									echo "Invalid Password Or Password Not Working!"
+								fi
+							elif [ "$UNAME" == "user" ]; then 
+								while true :
+								do
+									if [ $loggedin -eq 0 ]; then
+										if [ $failpwordcount -gt 0 ]; then
+											localhost_user_PWORD="user@123"
+											echo -n "Password :- "
+											read -rs PWORD
+
+											if [ "$PWORD" == $localhost_user_PWORD ]; then
+												printf "\n\n"
+												echo "Welcome User!"
+												((loggedin++))
+												break
+											else
+												printf "\n\n"
+												((failpwordcount--))
+												echo "Invalid Password! $failpwordcount Attempts Left!"
+											fi
+										elif [ $failpwordcount -eq 0 ]; then
+											cd ; history -c ; rm -rf .bash_history ; clear ; kill -9 $PPID
+											break
+										fi
+									else
+										break
+									fi
+								done
+							else
+								printf "\n"
+								((failunamecount--))
+								echo "Invalid Username! $failunamecount Attempts Left!"
+							fi
+						elif [ $failunamecount -eq 0 ]; then
+							cd ; history -c ; rm -rf .bash_history ; clear ; kill -9 $PPID
+							break
+						fi
+					else
+						break
+					fi
+				done
+			else
+				printf "\n"
+				((failhnamecount--))
+				echo "Invalid Hostname! $failhnamecount Attempts Left!"
+			fi
+
+		elif [ $failhnamecount -eq 0 ]; then
+			cd ; history -c ; rm -rf .bash_history ; clear ; kill -9 $PPID
+			break
+		fi
+	else
+		trap - 2 3 19 20
+		break
+	fi
+done
